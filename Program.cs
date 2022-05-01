@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using OBSWebsocketDotNet;
 using OBSWebsocketDotNet.Types;
 using OBSControl;
+using AudioPlayer;
 using Microsoft.AspNetCore.Authentication.Certificate;
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,48 +28,50 @@ if (app.Environment.IsDevelopment())
 app.UseCertificateForwarding();
 app.UseHttpsRedirection();
 
+OBSController OBSC = new OBSController();
+AudioPlayerController AP = new AudioPlayerController();
+
 app.MapGet("/", () =>
 {
-    return AudioPlayer.Play(); ;
+    return AP.AccessFileNames(); ;
 });
 
-new OBSController();
-app.Run();
-
-
-
-
-class AudioPlayer
+app.MapGet("/itsworking", () =>
 {
-    static string AccessFileNames()
-    {
-        DirectoryInfo di = new DirectoryInfo(@"/Users/chase/Documents/twitch/audio/");
-        FileInfo[] files = di.GetFiles("*.mp3");
+    OBSC.ItsWorking();
+});
 
-        List<string> fileNames = new List<string>();
-        foreach (FileInfo file in files)
-        {
-            fileNames.Add(file.Name);
-        }
-        Console.WriteLine("AUDIO FILES -> " + fileNames.Count);
-        string json = JsonConvert.SerializeObject(fileNames);
-        return json;
-    }
+app.MapGet("/getaudionames", () =>
+{
+    return AP.AccessFileNames();
+});
 
-    public static string Play()
-    {
-        AccessFileNames();
-        using (var audioFile = new AudioFileReader(@"/Users/chase/Documents/twitch/audio/bonk.mp3"))
-        using (var outputDevice = new WaveOutEvent())
-        {
-            outputDevice.Init(audioFile);
-            outputDevice.Play();
-            while (outputDevice.PlaybackState == PlaybackState.Playing)
-            {
-                Thread.Sleep(1000);
-            }
-        }
+app.MapPost("/playaudio", (string fileName) =>
+{
+    // Console.WriteLine(fileName);
+    AP.Play(fileName);
+});
 
-        return AccessFileNames();
-    }
-}
+app.MapPost("/playvideo", (string fileName) =>
+{
+    // Console.WriteLine(fileName);
+    OBSC.playVideo(fileName);
+});
+
+app.MapPost("/stopvideo", (string fileName) =>
+{
+    // Console.WriteLine(fileName);
+    OBSC.stopVideo(fileName);
+});
+
+app.MapGet("/getvideonames", () =>
+{
+    return OBSC.scenesMediaKids();
+});
+
+// app.MapGet("/getAllMediaSources", () =>
+// {
+//     return OBSC.GetSceneKids();
+// });
+
+app.Run();

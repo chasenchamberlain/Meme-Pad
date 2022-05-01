@@ -1,6 +1,8 @@
 using OBSWebsocketDotNet;
 using OBSWebsocketDotNet.Types;
 using System;
+using Newtonsoft.Json;
+
 // using System.Timers;
 // using System.Collections.Generic;
 // using Timer = System.Timers.Timer;
@@ -25,13 +27,11 @@ namespace OBSControl
             ConnectDisconnect();
             Console.WriteLine("OBS is created? + {0}", isConnected);
 
-            foreach (string scene in this.GetSceneKids())
-            {
-                Console.WriteLine(scene);
-            }
-            Console.WriteLine("VIDEO FILES -> " + this.GetSceneKids().Count);
-
-            obs.RestartMedia("Its Working");
+            // foreach (string scene in this.GetSceneKids())
+            // {
+            //     Console.WriteLine(scene);
+            // }
+            // Console.WriteLine("VIDEO FILES -> " + this.GetSceneKids().Count);
         }
 
         // public void InitTimer()
@@ -49,6 +49,59 @@ namespace OBSControl
         //         ConnectDisconnect();
         //     }
         // }
+
+        public void ItsWorking()
+        {
+            obs.RestartMedia("Its Working");
+        }
+
+        public void playVideo(string mediaSourceName)
+        {
+            obs.RestartMedia(mediaSourceName);
+        }
+
+        public void stopVideo(string mediaSourceName)
+        {
+            obs.StopMedia(mediaSourceName);
+        }
+
+        public string scenesMediaKids()
+        {
+            List<string> jsonSceneKids = new List<string>();
+            string jsonFileNames = JsonConvert.SerializeObject(jsonSceneKids);
+            if (!isConnected) return jsonFileNames;
+
+            List<OBSScene> scenes = obs.ListScenes();
+
+            try
+            {
+                if (scenes.Exists(x => x.Name == "1Soundboard"))
+                {
+                    OBSScene soundboardScene = scenes.Find(x => x.Name == "1Soundboard");
+                    foreach (var media in obs.GetSceneItemList(soundboardScene.Name))
+                    {
+                        if (media.SourceType == SceneItemSourceType.Scene)
+                        {
+                            jsonSceneKids.Add(media.SourceName.ToString().Replace("Group", "").Trim());
+                        }
+                        else
+                        {
+                            jsonSceneKids.Add(media.SourceName.ToString());
+                        }
+                    }
+                    // List<SceneItem> sceneKids = soundboardScene.Items;
+                    jsonFileNames = JsonConvert.SerializeObject(jsonSceneKids.Distinct().ToList());
+                    return jsonFileNames;
+                }
+
+            }
+            catch (ArgumentNullException e)
+            {
+                Console.WriteLine("Wrong scene name" + e.Message);
+            }
+            return jsonFileNames;
+
+        }
 
         public List<string> GetScenes()
         {
@@ -96,10 +149,10 @@ namespace OBSControl
             return sourceString.Distinct().ToList();
         }
 
-        public List<string> GetSceneKids()
+        public string GetSceneKids()
         {
             List<string> sourceString = new List<string>();
-            if (!isConnected) return sourceString;
+            if (!isConnected) JsonConvert.SerializeObject(sourceString);
 
             // List<MediaSource> mediaSources = obs.GetMediaSourcesList();
 
@@ -108,7 +161,7 @@ namespace OBSControl
                 sourceString.Add(ms.SourceName);
             }
             sourceString.Sort((x, y) => string.Compare(x, y));
-            return sourceString.Distinct().ToList();
+            return JsonConvert.SerializeObject(sourceString);
         }
 
         public void ConnectDisconnect()
