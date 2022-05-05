@@ -7,7 +7,20 @@ using OBSWebsocketDotNet.Types;
 using OBSControl;
 using AudioPlayer;
 using Microsoft.AspNetCore.Authentication.Certificate;
+
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                          policy.WithOrigins("https://chasennash.com",
+                                              "https://www.chasennash.com");
+                      });
+});
 
 builder.Services.AddAuthentication(CertificateAuthenticationDefaults.AuthenticationScheme).AddCertificate();
 
@@ -16,8 +29,16 @@ builder.Services.AddAuthentication(CertificateAuthenticationDefaults.Authenticat
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddControllers();
+
 var app = builder.Build();
-app.UseAuthentication();
+// app.UseAuthentication();
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+app.UseCors(MyAllowSpecificOrigins);
+// app.UseAuthorization();
+app.MapControllers();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -25,8 +46,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseCertificateForwarding();
-app.UseHttpsRedirection();
 
 OBSController OBSC = new OBSController();
 AudioPlayerController AP = new AudioPlayerController();

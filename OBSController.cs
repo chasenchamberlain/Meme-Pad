@@ -77,6 +77,7 @@ namespace OBSControl
             {
                 if (scenes.Exists(x => x.Name == "1Soundboard"))
                 {
+
                     OBSScene soundboardScene = scenes.Find(x => x.Name == "1Soundboard");
                     foreach (var media in obs.GetSceneItemList(soundboardScene.Name))
                     {
