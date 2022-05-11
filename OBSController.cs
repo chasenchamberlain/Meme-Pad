@@ -91,8 +91,8 @@ namespace OBSControl
 
         public string ScenesMediaKids()
         {
-            List<string> jsonSceneKids = new List<string>();
-            string jsonFileNames = JsonConvert.SerializeObject(jsonSceneKids);
+            List<string> listOfSceneKids = new List<string>();
+            string jsonFileNames = JsonConvert.SerializeObject(listOfSceneKids);
             if (!isConnected) return jsonFileNames;
 
             List<OBSScene> scenes = obs.ListScenes();
@@ -107,15 +107,15 @@ namespace OBSControl
                     {
                         if (media.SourceType == SceneItemSourceType.Scene)
                         {
-                            jsonSceneKids.Add(media.SourceName.ToString().Replace("Group", "").Trim());
+                            listOfSceneKids.Add(media.SourceName.ToString().Replace("Group", "").Trim());
                         }
                         else
                         {
-                            jsonSceneKids.Add(media.SourceName.ToString());
+                            listOfSceneKids.Add(media.SourceName.ToString());
                         }
                     }
-                    // List<SceneItem> sceneKids = soundboardScene.Items;
-                    jsonFileNames = JsonConvert.SerializeObject(jsonSceneKids.Distinct().ToList());
+                    listOfSceneKids.Sort((x, y) => string.Compare(x, y));
+                    jsonFileNames = JsonConvert.SerializeObject(listOfSceneKids.Distinct().ToList());
                     return jsonFileNames;
                 }
 

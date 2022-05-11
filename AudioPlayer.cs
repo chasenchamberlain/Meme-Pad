@@ -1,7 +1,6 @@
 using Newtonsoft.Json;
 using NAudio.Wave;
 
-
 namespace AudioPlayer
 {
     public class AudioPlayerController
@@ -11,13 +10,16 @@ namespace AudioPlayer
 
         public string AccessFileNames()
         {
-            DirectoryInfo di = new DirectoryInfo(@"/Users/chase/Documents/twitch/audio/");
-            FileInfo[] files = di.GetFiles("*.mp3");
+            // DirectoryInfo di = new DirectoryInfo(@"/Users/chase/Documents/twitch/audio/");
+            // FileInfo[] files = di.GetFiles("*.mp3");
+
+            var files = Directory.EnumerateFiles(@"/Users/chase/Documents/twitch/audio/", "*.*", SearchOption.AllDirectories)
+                .Where(s => s.ToLower().EndsWith(".mp3") || s.ToLower().EndsWith(".wav"));
 
             List<string> fileNames = new List<string>();
-            foreach (FileInfo file in files)
+            foreach (string file in files)
             {
-                fileNames.Add(file.Name);
+                fileNames.Add(Path.GetFileName(file));
             }
             fileNames.Sort((x, y) => string.Compare(x, y));
             Console.WriteLine("AUDIO FILES -> " + fileNames.Count);
