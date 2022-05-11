@@ -15,6 +15,8 @@ namespace OBSControl
         private static OBSController _instance;
         private bool isConnected = true;
         // private Timer timer;
+        private string currentlyPlaying;
+        static Random rnd = new Random();
 
         public OBSController()
         {
@@ -50,22 +52,44 @@ namespace OBSControl
         //     }
         // }
 
+        public string PlayRandomVideo()
+        {
+            string jsonVideoNames = ScenesMediaKids();
+            Console.WriteLine(jsonVideoNames);
+            List<string> AllVideos = new List<string>();
+            if (jsonVideoNames != " ")
+            {
+                AllVideos = JsonConvert.DeserializeObject<List<string>>(jsonVideoNames);
+            }
+            int r;
+            if (AllVideos != null)
+            {
+                r = rnd.Next(AllVideos.Count);
+                return PlayVideo(AllVideos[r]);
+            }
+            return "200";
+        }
+
         public void ItsWorking()
         {
             obs.RestartMedia("Its Working");
         }
 
-        public void playVideo(string mediaSourceName)
+        public string PlayVideo(string mediaSourceName)
         {
+            currentlyPlaying = mediaSourceName;
             obs.RestartMedia(mediaSourceName);
+            return "200";
         }
 
-        public void stopVideo(string mediaSourceName)
+        public string StopVideo()
         {
-            obs.StopMedia(mediaSourceName);
+            // Probably need error handling so if the clip was super short this doesnt freak out.
+            obs.StopMedia(currentlyPlaying);
+            return "200";
         }
 
-        public string scenesMediaKids()
+        public string ScenesMediaKids()
         {
             List<string> jsonSceneKids = new List<string>();
             string jsonFileNames = JsonConvert.SerializeObject(jsonSceneKids);

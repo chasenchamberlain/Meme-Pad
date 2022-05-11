@@ -18,7 +18,7 @@ builder.Services.AddCors(options =>
                       policy =>
                       {
                           policy.WithOrigins("https://chasennash.com",
-                                              "https://www.chasennash.com");
+                                              "https://www.chasennash.com", "http://localhost:3000").AllowAnyHeader();
                       });
 });
 
@@ -60,6 +60,8 @@ app.MapGet("/itsworking", () =>
     OBSC.ItsWorking();
 });
 
+// --------------------- Audio Calls -------------------
+
 app.MapGet("/getaudionames", () =>
 {
     return AP.AccessFileNames();
@@ -68,29 +70,41 @@ app.MapGet("/getaudionames", () =>
 app.MapPost("/playaudio", (string fileName) =>
 {
     // Console.WriteLine(fileName);
-    AP.Play(fileName);
+    return AP.Play(fileName);
 });
+
+app.MapGet("/stopaudio", () =>
+{
+    return AP.StopAudio();
+});
+
+app.MapGet("playrandomaudio", () =>
+{
+    return AP.PlayRandomAudio();
+});
+
+// --------------------- Video Calls -------------------
 
 app.MapPost("/playvideo", (string fileName) =>
 {
     // Console.WriteLine(fileName);
-    OBSC.playVideo(fileName);
+    return OBSC.PlayVideo(fileName);
 });
 
-app.MapPost("/stopvideo", (string fileName) =>
+app.MapGet("/stopvideo", () =>
 {
     // Console.WriteLine(fileName);
-    OBSC.stopVideo(fileName);
+    return OBSC.StopVideo();
 });
 
 app.MapGet("/getvideonames", () =>
 {
-    return OBSC.scenesMediaKids();
+    return OBSC.ScenesMediaKids();
 });
 
-// app.MapGet("/getAllMediaSources", () =>
-// {
-//     return OBSC.GetSceneKids();
-// });
+app.MapGet("/playrandomvideo", () =>
+{
+    return OBSC.PlayRandomVideo();
+});
 
 app.Run();

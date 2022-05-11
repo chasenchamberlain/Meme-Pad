@@ -6,6 +6,9 @@ namespace AudioPlayer
 {
     public class AudioPlayerController
     {
+        static Random rnd = new Random();
+        private WaveOutEvent? outputDevice;
+
         public string AccessFileNames()
         {
             DirectoryInfo di = new DirectoryInfo(@"/Users/chase/Documents/twitch/audio/");
@@ -23,28 +26,12 @@ namespace AudioPlayer
             return jsonFileNames;
         }
 
-        public string TestPlay()
-        {
-            using (var audioFile = new AudioFileReader(@"/Users/chase/Documents/twitch/audio/bonk.mp3"))
-            using (var outputDevice = new WaveOutEvent())
-            {
-                outputDevice.Init(audioFile);
-                outputDevice.Play();
-                while (outputDevice.PlaybackState == PlaybackState.Playing)
-                {
-                    Thread.Sleep(1000);
-                }
-            }
-
-            return AccessFileNames();
-        }
-
-        public void Play(string fileName)
+        public string Play(string fileName)
         {
             string filePrefix = @"/Users/chase/Documents/twitch/audio/";
             // Console.WriteLine(filePrefix + fileName);
             using (var audioFile = new AudioFileReader(filePrefix + fileName))
-            using (var outputDevice = new WaveOutEvent())
+            using (outputDevice = new WaveOutEvent())
             {
                 outputDevice.Init(audioFile);
                 outputDevice.Play();
@@ -53,6 +40,35 @@ namespace AudioPlayer
                     Thread.Sleep(1000);
                 }
             }
+            return "200";
+        }
+
+        public string StopAudio()
+        {
+            if (outputDevice != null)
+            {
+                outputDevice.Stop();
+                outputDevice.Dispose();
+            }
+            return "200";
+        }
+
+        public string PlayRandomAudio()
+        {
+            string jsonAudioNames = AccessFileNames();
+            List<string> allAudio = new List<string>();
+            if (jsonAudioNames != " ")
+            {
+                allAudio = JsonConvert.DeserializeObject<List<string>>(jsonAudioNames);
+            }
+            int r;
+            if (allAudio != null)
+            {
+                r = rnd.Next(allAudio.Count);
+                Play(allAudio[r]);
+            }
+
+            return "200";
         }
 
     }
