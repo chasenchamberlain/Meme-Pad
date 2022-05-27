@@ -16,3 +16,4 @@ sensitive.txt
 Properties/
 
 bin/Release/
+obj/Release/
